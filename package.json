@@ -1,0 +1,25 @@
+{
+  "name": "geoglobetales",
+  "version": "1.0.0",
+  "description": "Geographic Region Reveal Video Production System.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts GeoGlobeTales out/video.mp4",
+    "compositions": "remotion compositions src/index.ts"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.541"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.541",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
