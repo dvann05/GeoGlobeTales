@@ -1,23 +1,30 @@
 import React from "react";
-import { Composition } from "remotion";
+import { Composition, registerRoot } from "remotion";
+
+import { SceneCompositor } from "./engine/renderers/SceneCompositor";
+import { buildTimeline } from "./engine/timeline/Timeline";
+import { attachNarrationToProject } from "./engine/audio";
 import { templateProject } from "./projects/template/project";
-import { buildTimeline } from "./engine/timeline";
-import { SceneCompositor } from "./engine/renderers";
+import { generatedNarration } from "./projects/generated/narration";
 
-const timeline = buildTimeline(templateProject);
+const activeProject = generatedNarration
+  ? attachNarrationToProject(templateProject, generatedNarration)
+  : templateProject;
 
-export const Root: React.FC = () => {
-  return (
-    <Composition
-      id="GeoGlobeTales"
-      component={SceneCompositor}
-      durationInFrames={timeline.durationInFrames}
-      fps={templateProject.fps}
-      width={templateProject.width}
-      height={templateProject.height}
-      defaultProps={{
-        project: templateProject,
-      }}
-    />
-  );
-};
+const timeline = buildTimeline(activeProject);
+
+const RemotionRoot: React.FC = () => (
+  <Composition
+    id="GeoGlobeTales"
+    component={SceneCompositor}
+    durationInFrames={timeline.durationInFrames}
+    fps={activeProject.fps}
+    width={activeProject.width}
+    height={activeProject.height}
+    defaultProps={{
+      project: activeProject,
+    }}
+  />
+);
+
+registerRoot(RemotionRoot);

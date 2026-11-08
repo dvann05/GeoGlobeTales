@@ -1,4 +1,4 @@
-import type { AudioLayer } from "../timeline/SceneTypes";
+import type { AudioLayer, ProjectConfig } from "../timeline/SceneTypes";
 import type { SubtitleCue } from "../subtitles/SubtitleTypes";
 
 export type GeneratedNarration = {
@@ -13,49 +13,92 @@ export type GeneratedNarration = {
   subtitles: SubtitleCue[];
 };
 
-export type NarrationLayerOptions = {
-  id?: string;
-  startAtSeconds?: number;
-  volume?: number;
-  fadeInSeconds?: number;
-  fadeOutSeconds?: number;
-  playbackRate?: number;
-};
-
-export function createNarrationLayer(
+export function attachNarrationToProject(
+  project: ProjectConfig,
   metadata: GeneratedNarration,
-  options: NarrationLayerOptions = {},
-): AudioLayer {
+): ProjectConfig {
+  const totalDuration = project.scenes.reduce(
+    (total, scene) => total + scene.durationSeconds,
+    0,
+  );
+
   if (!metadata.audioPath) {
-    throw new Error("Narration audioPath belum tersedia.");
+    throw new Error("Narasi gagal: audioPath tidak tersedia.");
   }
 
-  if (!Number.isFinite(metadata.durationSeconds) ||
-      metadata.durationSeconds <= 0) {
-    throw new Error("Durasi narasi tidak valid.");
+  if (
+    !Number.isFinite(metadata.durationSeconds) ||
+    metadata.durationSeconds < totalDuration
+  ) {
+    throw new Error(
+      `Durasi narasi ${metadata.durationSeconds}s lebih pendek dari timeline ${totalDuration}s.`,
+    );
   }
+
+  let elapsed = 0;
+
+  const scenes = project.scenes.map((scene) => {
+    const segmentStart = elapsed;
+    const segmentEnd = Math.min(
+      elapsed + scene.durationSeconds,
+      metadata.durationSeconds,
+    );
+
+    elapsed += scene.durationSeconds;
+
+    const segmentCues = metadata.subtitles
+      .filter(
+        (cue) =>
+          cue.endSeconds > segmentStart &&
+          cue.startSeconds < segmentEnd,
+      )
+      .map((cue) => ({
+        ...cue,
+        startSeconds: Math.max(0, cue.startSeconds - segmentStart),
+        endSeconds: Math.min(
+          segmentEnd - segmentStart,
+          cue.endSeconds - segmentStart,
+        ),
+      }))
+      .filter((cue) => cue.endSeconds > cue.startSeconds);
+
+    const narrationLayer = {
+      id: `narration-${scene.id}`,
+      type: "audio",
+      visible: true,
+      opacity: 1,
+      src: metadata.audioPath,
+      kind: "narration",
+      startAtSeconds: 0,
+      startFromSeconds: segmentStart,
+      durationSeconds: segmentEnd - segmentStart,
+      volume: 1,
+      fadeInSeconds: 0,
+      fadeOutSeconds: 0,
+      playbackRate: 1,
+      narration: {
+        text: metadata.text,
+        language: metadata.language,
+        voiceId: metadata.voiceId,
+        provider: metadata.provider,
+        alignment: metadata.alignment,
+        subtitles: segmentCues,
+      },
+    } as unknown as AudioLayer;
+
+    return {
+      ...scene,
+      layers: [
+        ...scene.layers.filter(
+          (layer) => layer.id !== narrationLayer.id,
+        ),
+        narrationLayer,
+      ],
+    };
+  });
 
   return {
-    id: options.id ?? "generated-narration",
-    type: "audio",
-    visible: true,
-    src: metadata.audioPath,
-    kind: "narration",
-    startAtSeconds: options.startAtSeconds ?? 0,
-    durationSeconds: metadata.durationSeconds,
-    volume: options.volume ?? 1,
-    fadeInSeconds: options.fadeInSeconds ?? 0.25,
-    fadeOutSeconds: options.fadeOutSeconds ?? 0.4,
-    playbackRate: options.playbackRate ?? 1,
-    narration: {
-      text: metadata.text,
-      language: metadata.language,
-      voiceId: metadata.voiceId,
-      provider: metadata.provider,
-      alignment: metadata.alignment === "estimated"
-        ? "manual"
-        : metadata.alignment,
-      subtitles: metadata.subtitles,
-    },
-  } as AudioLayer;
+    ...project,
+    scenes,
+  };
 }

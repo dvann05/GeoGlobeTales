@@ -9,7 +9,7 @@ export type NarrationMetadata = {
   language?: string;
   voiceId?: string;
   provider?: string;
-  alignment?: "manual" | "provider";
+  alignment?: "manual" | "provider" | "estimated";
   subtitles?: SubtitleCue[];
 };
 
