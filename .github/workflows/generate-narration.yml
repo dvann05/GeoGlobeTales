@@ -28,6 +28,7 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,7 +37,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
 
       - name: Install TTS engine
         run: |
@@ -54,17 +54,23 @@ jobs:
             --speaker "$TTS_SPEAKER" \
             --filename "$TTS_FILENAME"
 
-      - name: Export narration metadata for Remotion
+      - name: Export narration metadata
         env:
           TTS_FILENAME: ${{ inputs.filename }}
         run: |
           python scripts/export_narration_module.py "$TTS_FILENAME"
 
-      - name: Save generated audio to repository
+      - name: Validate generated assets
+        run: |
+          node scripts/validate-assets.cjs
+
+      - name: Save generated narration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/audio/narration/
+
+          git add -A -- public/audio/narration src/projects/generated/narration.ts
+
           if ! git diff --cached --quiet; then
             git commit -m "Add generated Indonesian narration"
             git push
