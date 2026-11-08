@@ -1,5 +1,5 @@
 import type { DatasetLevel, GeographicDataset } from "../data/DatasetRegistry";
-import { datasetRegistry } from "../data/DatasetRegistry";
+import { datasetRegistry } from "../data/datasets";
 import { resolveRegions } from "./RegionSelector";
 import { REGION_ALIASES } from "../data/regions/aliases";
 
