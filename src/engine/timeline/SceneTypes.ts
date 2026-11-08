@@ -1,3 +1,4 @@
+import type { LayerAnimation } from "../animation/AnimationTypes";
 import type { CameraKeyframe } from "../camera/CameraTypes";
 
 export type SceneLayerType =
@@ -15,6 +16,7 @@ export type BaseLayer = {
   type: SceneLayerType;
   visible?: boolean;
   opacity?: number;
+  animation?: LayerAnimation;
 };
 
 export type MapLayer = BaseLayer & {

@@ -12,6 +12,8 @@ import type {
 import { MapLayerRenderer } from "./MapLayerRenderer";
 import { TextLayerRenderer } from "./TextLayerRenderer";
 import { ImageLayerRenderer } from "./ImageLayerRenderer";
+import { AnimatedLayer } from "../animation/AnimatedLayer";
+import { SceneTransition } from "../animation/SceneTransition";
 
 type Props = {
   scene: ResolvedScene;
@@ -22,19 +24,23 @@ const renderLayer = (
   layer: SceneLayer,
   scene: ResolvedScene,
   project: ProjectConfig,
-) => {
+): React.ReactNode => {
+  if (layer.visible === false) return null;
+
+  let content: React.ReactNode = null;
+
   switch (layer.type) {
     case "map": {
       const routes = scene.layers.filter(
         (item): item is RouteLayer => item.type === "route",
       );
+
       const markers = scene.layers.filter(
         (item): item is MarkerLayer => item.type === "marker",
       );
 
-      return (
+      content = (
         <MapLayerRenderer
-          key={layer.id}
           layer={layer as MapLayer}
           routes={routes}
           markers={markers}
@@ -42,38 +48,40 @@ const renderLayer = (
           canvasHeight={project.height}
         />
       );
+      break;
     }
 
     case "text":
-      return (
-        <TextLayerRenderer
-          key={layer.id}
-          layer={layer as TextLayer}
-        />
+      content = (
+        <TextLayerRenderer layer={layer as TextLayer} />
       );
+      break;
 
     case "image":
-      return (
-        <ImageLayerRenderer
-          key={layer.id}
-          layer={layer as ImageLayer}
-        />
+      content = (
+        <ImageLayerRenderer layer={layer as ImageLayer} />
       );
+      break;
 
     case "route":
     case "marker":
-      // GeographicMap renders these over the map using the same projection.
-      return null;
-
     case "audio":
     case "infographic":
     case "custom":
-      // Dedicated audio and custom renderers will be connected in later stages.
       return null;
 
     default:
       return null;
   }
+
+  return (
+    <AnimatedLayer
+      key={layer.id}
+      animation={layer.animation}
+    >
+      {content}
+    </AnimatedLayer>
+  );
 };
 
 export const SceneRenderer: React.FC<Props> = ({
@@ -81,19 +89,25 @@ export const SceneRenderer: React.FC<Props> = ({
   project,
 }) => {
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: project.width,
-        height: project.height,
-        overflow: "hidden",
-        backgroundColor: "#071827",
-      }}
+    <SceneTransition
+      transitionIn={scene.transitionIn}
+      transitionOut={scene.transitionOut}
+      durationInFrames={scene.durationInFrames}
     >
-      {scene.layers.map((layer) =>
-        renderLayer(layer, scene, project),
-      )}
-    </div>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: project.width,
+          height: project.height,
+          overflow: "hidden",
+          backgroundColor: "#071827",
+        }}
+      >
+        {scene.layers.map((layer) =>
+          renderLayer(layer, scene, project),
+        )}
+      </div>
+    </SceneTransition>
   );
 };

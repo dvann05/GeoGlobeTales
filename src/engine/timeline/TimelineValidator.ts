@@ -61,6 +61,34 @@ function validateScene(scene: SceneConfig): ValidationIssue[] {
 
     layerIds.add(layer.id);
 
+    if (layer.animation) {
+      if (
+        layer.animation.delaySeconds !== undefined &&
+        layer.animation.delaySeconds < 0
+      ) {
+        issues.push({
+          severity: "error",
+          code: "ANIMATION_DELAY_INVALID",
+          message: `Layer "${layer.id}" has a negative animation delay.`,
+          sceneId: scene.id,
+          layerId: layer.id,
+        });
+      }
+
+      if (
+        layer.animation.durationSeconds !== undefined &&
+        layer.animation.durationSeconds <= 0
+      ) {
+        issues.push({
+          severity: "error",
+          code: "ANIMATION_DURATION_INVALID",
+          message: `Layer "${layer.id}" animation duration must be positive.`,
+          sceneId: scene.id,
+          layerId: layer.id,
+        });
+      }
+    }
+
     if (layer.opacity !== undefined &&
       (layer.opacity < 0 || layer.opacity > 1)) {
       issues.push({
