@@ -5,12 +5,10 @@ import {
   geoOrthographic,
   geoPath,
 } from "d3-geo";
-
 import {
   useCurrentFrame,
   interpolate,
 } from "remotion";
-
 import type { FeatureCollection } from "geojson";
 import type { CameraKeyframe } from "./camera/CameraTypes";
 import { getCameraState } from "./camera/CameraInterpolator";
@@ -20,24 +18,37 @@ export type MapProjection =
   | "mercator"
   | "orthographic";
 
+export type GeographicRoute = {
+  id: string;
+  coordinates: [number, number][];
+  color?: string;
+  strokeWidth?: number;
+};
+
+export type GeographicMarker = {
+  id: string;
+  longitude: number;
+  latitude: number;
+  label?: string;
+  color?: string;
+};
+
 type Props = {
   data: FeatureCollection;
   width?: number;
   height?: number;
   projection?: MapProjection;
-
   highlightIds?: Array<string | number>;
   highlightNames?: string[];
-
   cameraKeyframes?: CameraKeyframe[];
-
   highlightColor?: string;
   landColor?: string;
   borderColor?: string;
   backgroundColor?: string;
-
   animate?: boolean;
   borderWidth?: number;
+  routes?: GeographicRoute[];
+  markers?: GeographicMarker[];
 };
 
 const normalize = (value: string) =>
@@ -53,19 +64,17 @@ export const GeographicMap: React.FC<Props> = ({
   width = 1080,
   height = 1350,
   projection: projectionType = "naturalEarth",
-
   highlightIds = [],
   highlightNames = [],
-
   cameraKeyframes,
-
   highlightColor = "#F07A1E",
   landColor = "#526B78",
   borderColor = "#B9CBD5",
   backgroundColor = "#071827",
-
   animate = true,
   borderWidth = 1,
+  routes = [],
+  markers = [],
 }) => {
   const frame = useCurrentFrame();
 
@@ -86,21 +95,16 @@ export const GeographicMap: React.FC<Props> = ({
   const projection = projections[projectionType];
 
   projection.rotate(camera.rotation);
-
   projection.fitExtent(
     [[20, 20], [width - 20, height - 20]],
-    data
+    data,
   );
 
   const pathGenerator = geoPath().projection(projection);
-
   const projectedCenter = projection(camera.center);
 
-  const centerX = width / 2;
-  const centerY = height / 2;
-
   const cameraTransform = projectedCenter
-    ? `translate(${centerX} ${centerY}) scale(${camera.zoom}) translate(${-projectedCenter[0]} ${-projectedCenter[1]})`
+    ? `translate(${width / 2} ${height / 2}) scale(${camera.zoom}) translate(${-projectedCenter[0]} ${-projectedCenter[1]})`
     : undefined;
 
   const reveal = animate
@@ -115,6 +119,7 @@ export const GeographicMap: React.FC<Props> = ({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
+      style={{ display: "block", overflow: "hidden" }}
     >
       <rect
         width={width}
@@ -125,15 +130,11 @@ export const GeographicMap: React.FC<Props> = ({
       <g transform={cameraTransform}>
         {data.features.map((item, index) => {
           const properties = item.properties ?? {};
-
-          const id = String(
-            item.id ?? properties.id ?? index
-          );
+          const id = String(item.id ?? properties.id ?? index);
 
           const names = Object.values(properties)
-            .filter(
-              (value): value is string =>
-                typeof value === "string"
+            .filter((value): value is string =>
+              typeof value === "string"
             )
             .map(normalize);
 
@@ -153,6 +154,63 @@ export const GeographicMap: React.FC<Props> = ({
               strokeWidth={borderWidth / camera.zoom}
               strokeLinejoin="round"
             />
+          );
+        })}
+
+        {routes.map((route) => {
+          if (route.coordinates.length < 2) return null;
+
+          const geometry = {
+            type: "LineString" as const,
+            coordinates: route.coordinates,
+          };
+
+          return (
+            <path
+              key={route.id}
+              d={pathGenerator(geometry) ?? ""}
+              fill="none"
+              stroke={route.color ?? "#FFD166"}
+              strokeWidth={(route.strokeWidth ?? 4) / camera.zoom}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          );
+        })}
+
+        {markers.map((marker) => {
+          const point = projection([
+            marker.longitude,
+            marker.latitude,
+          ]);
+
+          if (!point) return null;
+
+          return (
+            <g key={marker.id}>
+              <circle
+                cx={point[0]}
+                cy={point[1]}
+                r={7 / camera.zoom}
+                fill={marker.color ?? "#FFCA3A"}
+                stroke="#FFFFFF"
+                strokeWidth={1.5 / camera.zoom}
+              />
+              {marker.label && (
+                <text
+                  x={point[0] + 12 / camera.zoom}
+                  y={point[1] - 10 / camera.zoom}
+                  fill="#FFFFFF"
+                  fontSize={18 / camera.zoom}
+                  fontWeight={700}
+                  paintOrder="stroke"
+                  stroke="#071827"
+                  strokeWidth={3 / camera.zoom}
+                >
+                  {marker.label}
+                </text>
+              )}
+            </g>
           );
         })}
       </g>

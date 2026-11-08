@@ -20,6 +20,10 @@ export type BaseLayer = {
 export type MapLayer = BaseLayer & {
   type: "map";
   datasetId: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
   projection?: "natural-earth" | "mercator" | "orthographic";
   highlightIds?: string[];
   highlightNames?: string[];

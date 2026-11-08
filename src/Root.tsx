@@ -1,39 +1,23 @@
 import React from "react";
 import { Composition } from "remotion";
+import { templateProject } from "./projects/template/project";
+import { buildTimeline } from "./engine/timeline";
+import { SceneCompositor } from "./engine/renderers";
 
-const MainVideo: React.FC = () => {
-  return (
-    <div
-      style={{
-        flex: 1,
-        backgroundColor: "#071827",
-        color: "#FFFFFF",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        fontFamily: "Arial",
-      }}
-    >
-      <div style={{ fontSize: 64, fontWeight: 800 }}>
-        GEOGLOBETALES
-      </div>
-      <div style={{ fontSize: 28, marginTop: 20 }}>
-        Geographic Region Reveal Studio
-      </div>
-    </div>
-  );
-};
+const timeline = buildTimeline(templateProject);
 
 export const Root: React.FC = () => {
   return (
     <Composition
       id="GeoGlobeTales"
-      component={MainVideo}
-      durationInFrames={240}
-      fps={30}
-      width={1080}
-      height={1920}
+      component={SceneCompositor}
+      durationInFrames={timeline.durationInFrames}
+      fps={templateProject.fps}
+      width={templateProject.width}
+      height={templateProject.height}
+      defaultProps={{
+        project: templateProject,
+      }}
     />
   );
 };
