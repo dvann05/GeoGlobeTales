@@ -26,7 +26,6 @@ export function validateSubtitles(
         message: `Duplicate subtitle cue ID: ${cue.id}`,
       });
     }
-
     ids.add(cue.id);
 
     if (!cue.text.trim()) {
@@ -60,16 +59,40 @@ export function validateSubtitles(
     }
   }
 
-  const sorted = [...cues].sort(
-    (a, b) => a.startSeconds - b.startSeconds,
-  );
-
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i].startSeconds < sorted[i - 1].startSeconds) {
+  for (let i = 1; i < cues.length; i++) {
+    if (cues[i].startSeconds < cues[i - 1].startSeconds) {
       issues.push({
-        cueId: sorted[i].id,
+        cueId: cues[i].id,
         message: "Subtitle cues are not chronologically ordered.",
       });
+    }
+  }
+
+  const sorted = cues
+    .filter(
+      cue =>
+        Number.isFinite(cue.startSeconds) &&
+        Number.isFinite(cue.endSeconds) &&
+        cue.startSeconds >= 0 &&
+        cue.endSeconds > cue.startSeconds,
+    )
+    .slice()
+    .sort((a, b) => a.startSeconds - b.startSeconds);
+
+  let furthestEnd = -Infinity;
+  let furthestCueId = "";
+
+  for (const cue of sorted) {
+    if (cue.startSeconds < furthestEnd) {
+      issues.push({
+        cueId: cue.id,
+        message: `Subtitle overlaps with cue ${furthestCueId}.`,
+      });
+    }
+
+    if (cue.endSeconds > furthestEnd) {
+      furthestEnd = cue.endSeconds;
+      furthestCueId = cue.id;
     }
   }
 
