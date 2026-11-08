@@ -16,6 +16,7 @@ export type NarrationMetadata = {
 export type AudioLayerConfig = {
   kind?: AudioKind;
   startAtSeconds?: number;
+  startFromSeconds?: number;
   durationSeconds?: number;
   fadeInSeconds?: number;
   fadeOutSeconds?: number;

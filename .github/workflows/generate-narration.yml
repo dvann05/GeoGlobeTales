@@ -1,4 +1,4 @@
-name: Generate Indonesian Narration
+name: Generate Indonesian Narration and Video
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ permissions:
   contents: write
 
 jobs:
-  generate:
+  generate-and-render:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,17 +38,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install TTS engine
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install "git+https://github.com/drat/TTS-Indonesia-Gratis.git"
-
-      - name: Generate narration and subtitles
+      - name: Generate Indonesian narration
         env:
           TTS_TEXT: ${{ inputs.text }}
           TTS_SPEAKER: ${{ inputs.speaker }}
           TTS_FILENAME: ${{ inputs.filename }}
         run: |
+          python -m pip install --upgrade pip
+          python -m pip install "git+https://github.com/drat/TTS-Indonesia-Gratis.git"
           python scripts/generate_tts.py \
             --text "$TTS_TEXT" \
             --speaker "$TTS_SPEAKER" \
@@ -60,20 +57,41 @@ jobs:
         run: |
           python scripts/export_narration_module.py "$TTS_FILENAME"
 
-      - name: Validate generated assets
+      - name: Validate narration assets
+        run: node scripts/validate-assets.cjs
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install video dependencies
+        run: npm ci
+
+      - name: Prepare Remotion browser
+        run: npx remotion browser ensure
+
+      - name: Render narrated MP4
         run: |
-          node scripts/validate-assets.cjs
+          mkdir -p out
+          npm run render
 
       - name: Save generated narration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add -A -- public/audio/narration src/projects/generated/narration.ts
 
           if ! git diff --cached --quiet; then
             git commit -m "Add generated Indonesian narration"
             git push
-          else
-            echo "No generated files to commit."
           fi
+
+      - name: Upload finished video
+        uses: actions/upload-artifact@v4
+        with:
+          name: GeoGlobeTales-20s-MP4
+          path: out/video.mp4
+          if-no-files-found: error
+          retention-days: 7

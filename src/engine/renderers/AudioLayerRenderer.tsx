@@ -80,6 +80,7 @@ export const AudioLayerRenderer: React.FC<Props> = ({
       <>
         <Audio
           src={resolveAudioSource(layer.src)}
+          startFrom={Math.round((layer.startFromSeconds ?? 0) * fps)}
           playbackRate={playbackRate}
           volume={(frame) => {
             let multiplier = 1;
