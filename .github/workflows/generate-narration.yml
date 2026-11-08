@@ -54,6 +54,12 @@ jobs:
             --speaker "$TTS_SPEAKER" \
             --filename "$TTS_FILENAME"
 
+      - name: Export narration metadata for Remotion
+        env:
+          TTS_FILENAME: ${{ inputs.filename }}
+        run: |
+          python scripts/export_narration_module.py "$TTS_FILENAME"
+
       - name: Save generated audio to repository
         run: |
           git config user.name "github-actions[bot]"
