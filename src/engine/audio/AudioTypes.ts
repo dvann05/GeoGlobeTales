@@ -1,3 +1,4 @@
+import type { SubtitleCue } from "../subtitles/SubtitleTypes";
 export type AudioKind =
   | "narration"
   | "music"
@@ -8,6 +9,8 @@ export type NarrationMetadata = {
   language?: string;
   voiceId?: string;
   provider?: string;
+  alignment?: "manual" | "provider";
+  subtitles?: SubtitleCue[];
 };
 
 export type AudioLayerConfig = {

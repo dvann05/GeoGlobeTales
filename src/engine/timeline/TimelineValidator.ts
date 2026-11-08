@@ -1,5 +1,6 @@
 import type { ProjectConfig, SceneConfig } from "./SceneTypes";
 import { buildTimeline } from "./Timeline";
+import { validateSubtitles } from "../subtitles/SubtitleValidator";
 
 export type ValidationIssue = {
   severity: "error" | "warning";
@@ -151,6 +152,26 @@ function validateScene(scene: SceneConfig): ValidationIssue[] {
           severity: "error",
           code: "AUDIO_PLAYBACK_RATE_INVALID",
           message: `Audio layer "${layer.id}" playback rate must be between 0.25 and 4.`,
+          sceneId: scene.id,
+          layerId: layer.id,
+        });
+      }
+    }
+
+    if (
+      layer.type === "audio" &&
+      layer.narration?.subtitles
+    ) {
+      const subtitleIssues = validateSubtitles(
+        layer.narration.subtitles,
+        layer.durationSeconds,
+      );
+
+      for (const subtitleIssue of subtitleIssues) {
+        issues.push({
+          severity: "error",
+          code: "SUBTITLE_INVALID",
+          message: subtitleIssue.message,
           sceneId: scene.id,
           layerId: layer.id,
         });

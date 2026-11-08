@@ -6,6 +6,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { AudioLayer } from "../timeline/SceneTypes";
+import { SubtitleRenderer } from "../subtitles/SubtitleRenderer";
 
 type Props = {
   layer: AudioLayer;
@@ -48,14 +49,14 @@ export const AudioLayerRenderer: React.FC<Props> = ({
     Math.max(1, requestedFrames),
   );
 
-  const fadeInFrames = Math.max(
-    0,
-    Math.round((layer.fadeInSeconds ?? 0) * fps),
+  const fadeIn = Math.min(
+    durationInFrames,
+    Math.max(0, Math.round((layer.fadeInSeconds ?? 0) * fps)),
   );
 
-  const fadeOutFrames = Math.max(
-    0,
-    Math.round((layer.fadeOutSeconds ?? 0) * fps),
+  const fadeOut = Math.min(
+    durationInFrames,
+    Math.max(0, Math.round((layer.fadeOutSeconds ?? 0) * fps)),
   );
 
   const baseVolume = Math.max(
@@ -63,13 +64,12 @@ export const AudioLayerRenderer: React.FC<Props> = ({
     Math.min(1, layer.volume ?? 1),
   );
 
-  const fadeIn = Math.min(fadeInFrames, durationInFrames);
-  const fadeOut = Math.min(fadeOutFrames, durationInFrames);
-
   const playbackRate = Math.max(
     0.25,
     Math.min(4, layer.playbackRate ?? 1),
   );
+
+  const subtitleCues = layer.narration?.subtitles ?? [];
 
   return (
     <Sequence
@@ -77,35 +77,41 @@ export const AudioLayerRenderer: React.FC<Props> = ({
       durationInFrames={durationInFrames}
       layout="none"
     >
-      <Audio
-        src={resolveAudioSource(layer.src)}
-        playbackRate={playbackRate}
-        volume={(frame) => {
-          let multiplier = 1;
+      <>
+        <Audio
+          src={resolveAudioSource(layer.src)}
+          playbackRate={playbackRate}
+          volume={(frame) => {
+            let multiplier = 1;
 
-          if (fadeIn > 0 && frame < fadeIn) {
-            multiplier = Math.min(
-              multiplier,
-              frame / fadeIn,
-            );
-          }
+            if (fadeIn > 0 && frame < fadeIn) {
+              multiplier = Math.min(multiplier, frame / fadeIn);
+            }
 
-          if (
-            fadeOut > 0 &&
-            frame > durationInFrames - fadeOut
-          ) {
-            multiplier = Math.min(
-              multiplier,
-              Math.max(
-                0,
-                (durationInFrames - frame) / fadeOut,
-              ),
-            );
-          }
+            if (
+              fadeOut > 0 &&
+              frame > durationInFrames - fadeOut
+            ) {
+              multiplier = Math.min(
+                multiplier,
+                Math.max(
+                  0,
+                  (durationInFrames - frame) / fadeOut,
+                ),
+              );
+            }
 
-          return baseVolume * multiplier;
-        }}
-      />
+            return baseVolume * multiplier;
+          }}
+        />
+
+        {layer.kind === "narration" &&
+          layer.narration?.subtitles && (
+            <SubtitleRenderer
+              cues={subtitleCues}
+            />
+          )}
+      </>
     </Sequence>
   );
 };
