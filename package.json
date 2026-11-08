@@ -12,6 +12,7 @@
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
+    "d3-geo": "^3.1.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "remotion": "^4.0.541",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@remotion/cli": "^4.0.541",
+    "@types/d3-geo": "^3.1.1",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

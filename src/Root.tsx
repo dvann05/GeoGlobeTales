@@ -1,5 +1,5 @@
 import React from "react";
-import { Composition, registerRoot } from "remotion";
+import { Composition } from "remotion";
 
 import { SceneCompositor } from "./engine/renderers/SceneCompositor";
 import { buildTimeline } from "./engine/timeline/Timeline";
@@ -13,7 +13,7 @@ const activeProject = generatedNarration
 
 const timeline = buildTimeline(activeProject);
 
-const RemotionRoot: React.FC = () => (
+export const Root: React.FC = () => (
   <Composition
     id="GeoGlobeTales"
     component={SceneCompositor}
@@ -26,5 +26,3 @@ const RemotionRoot: React.FC = () => (
     }}
   />
 );
-
-registerRoot(RemotionRoot);
