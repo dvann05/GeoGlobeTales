@@ -19,6 +19,7 @@ type Props = {
   height?: number;
   projection?: MapProjection;
   highlightIds?: Array<string | number>;
+  highlightNames?: string[];
   highlightColor?: string;
   landColor?: string;
   borderColor?: string;
@@ -27,12 +28,21 @@ type Props = {
   borderWidth?: number;
 };
 
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
 export const GeographicMap: React.FC<Props> = ({
   data,
   width = 1080,
   height = 1350,
   projection: projectionType = "naturalEarth",
   highlightIds = [],
+  highlightNames = [],
   highlightColor = "#F07A1E",
   landColor = "#526B78",
   borderColor = "#B9CBD5",
@@ -63,25 +73,26 @@ export const GeographicMap: React.FC<Props> = ({
     : 1;
 
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-    >
-      <rect
-        width={width}
-        height={height}
-        fill={backgroundColor}
-      />
+    <svg width={width} height={height}
+      viewBox={`0 0 ${width} ${height}`}>
+      <rect width={width} height={height}
+        fill={backgroundColor} />
 
       {data.features.map((item, index) => {
-        const id = String(
-          item.id ?? item.properties?.name ?? index
-        );
+        const properties = item.properties ?? {};
+        const id = String(item.id ?? properties.id ?? index);
 
-        const selected = highlightIds.some(
-          (value) => String(value) === id
-        );
+        const names = Object.values(properties)
+          .filter((value): value is string =>
+            typeof value === "string"
+          )
+          .map(normalize);
+
+        const selected =
+          highlightIds.map(String).includes(id) ||
+          highlightNames.some((name) =>
+            names.includes(normalize(name))
+          );
 
         return (
           <path
