@@ -1,4 +1,5 @@
 import type { LayerAnimation } from "../animation/AnimationTypes";
+import type { AudioLayerConfig } from "../audio/AudioTypes";
 import type { CameraKeyframe } from "../camera/CameraTypes";
 
 export type SceneLayerType =
@@ -71,12 +72,10 @@ export type MarkerLayer = BaseLayer & {
   color?: string;
 };
 
-export type AudioLayer = BaseLayer & {
+export type AudioLayer = BaseLayer & AudioLayerConfig & {
   type: "audio";
   src: string;
   volume?: number;
-  fadeInSeconds?: number;
-  fadeOutSeconds?: number;
 };
 
 export type CustomLayer = BaseLayer & {

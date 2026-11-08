@@ -12,6 +12,7 @@ import type {
 import { MapLayerRenderer } from "./MapLayerRenderer";
 import { TextLayerRenderer } from "./TextLayerRenderer";
 import { ImageLayerRenderer } from "./ImageLayerRenderer";
+import { AudioLayerRenderer } from "./AudioLayerRenderer";
 import { AnimatedLayer } from "../animation/AnimatedLayer";
 import { SceneTransition } from "../animation/SceneTransition";
 
@@ -63,9 +64,17 @@ const renderLayer = (
       );
       break;
 
+    case "audio":
+      content = (
+        <AudioLayerRenderer
+          layer={layer}
+          sceneDurationSeconds={scene.durationSeconds}
+        />
+      );
+      break;
+
     case "route":
     case "marker":
-    case "audio":
     case "infographic":
     case "custom":
       return null;

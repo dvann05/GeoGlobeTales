@@ -121,6 +121,42 @@ function validateScene(scene: SceneConfig): ValidationIssue[] {
       });
     }
 
+    if (layer.type === "audio") {
+      const audioValues = [
+        layer.startAtSeconds ?? 0,
+        layer.durationSeconds ?? 0,
+        layer.fadeInSeconds ?? 0,
+        layer.fadeOutSeconds ?? 0,
+      ];
+
+      if (audioValues.some((value) =>
+        !Number.isFinite(value) || value < 0
+      )) {
+        issues.push({
+          severity: "error",
+          code: "AUDIO_TIMING_INVALID",
+          message: `Audio layer "${layer.id}" has invalid timing values.`,
+          sceneId: scene.id,
+          layerId: layer.id,
+        });
+      }
+
+      if (
+        layer.playbackRate !== undefined &&
+        (!Number.isFinite(layer.playbackRate) ||
+          layer.playbackRate < 0.25 ||
+          layer.playbackRate > 4)
+      ) {
+        issues.push({
+          severity: "error",
+          code: "AUDIO_PLAYBACK_RATE_INVALID",
+          message: `Audio layer "${layer.id}" playback rate must be between 0.25 and 4.`,
+          sceneId: scene.id,
+          layerId: layer.id,
+        });
+      }
+    }
+
     if (layer.type === "audio" &&
       (!layer.src.trim() ||
         (layer.volume !== undefined &&
