@@ -5,17 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "remotion studio src/index.ts",
-    "render": "node scripts/validate-assets.cjs && remotion render src/index.ts GeoGlobeTales out/video.mp4",
+    "start": "node scripts/download-earth-assets.cjs && remotion studio src/index.ts",
+    "render": "node scripts/download-earth-assets.cjs && node scripts/validate-assets.cjs && remotion render src/index.ts GeoGlobeTales out/video.mp4",
     "compositions": "remotion compositions src/index.ts"
   },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
+    "@react-three/fiber": "^9.8.2",
+    "@remotion/three": "^4.0.541",
+    "@types/three": "^0.187.0",
     "d3-geo": "^3.1.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "remotion": "^4.0.541",
+    "three": "^0.187.0",
     "topojson-client": "^3.1.0",
     "world-atlas": "^2.0.2"
   },
