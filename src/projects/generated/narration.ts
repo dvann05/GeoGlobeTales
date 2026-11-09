@@ -7,38 +7,38 @@ export const generatedNarration: GeneratedNarration = {
   "text": "Indonesia merupakan negara kepulauan yang terbentuk melalui proses geologi selama jutaan tahun. Pergerakan lempeng tektonik menyebabkan berbagai perubahan pada permukaan bumi. Aktivitas vulkanik, pergeseran kerak bumi, dan perubahan permukaan laut turut membentuk ribuan pulau yang kini menjadi wilayah Indonesia. Proses panjang tersebut menghasilkan bentang alam yang beragam, mulai dari pegunungan, gunung berapi, hingga dataran rendah. Inilah perjalanan geologi yang membentuk kepulauan Indonesia seperti yang kita kenal sekarang.",
   "audioPath": "audio/narration/narration.wav",
   "format": "wav",
-  "durationSeconds": 31.966,
+  "durationSeconds": 32.245,
   "alignment": "estimated",
   "subtitles": [
     {
       "id": "subtitle-1",
       "text": "Indonesia merupakan negara kepulauan yang terbentuk melalui proses geologi selama jutaan tahun.",
       "startSeconds": 0.0,
-      "endSeconds": 5.741
+      "endSeconds": 5.791
     },
     {
       "id": "subtitle-2",
       "text": "Pergerakan lempeng tektonik menyebabkan berbagai perubahan pada permukaan bumi.",
-      "startSeconds": 5.741,
-      "endSeconds": 10.514
+      "startSeconds": 5.791,
+      "endSeconds": 10.606
     },
     {
       "id": "subtitle-3",
       "text": "Aktivitas vulkanik, pergeseran kerak bumi, dan perubahan permukaan laut turut membentuk ribuan pulau yang kini menjadi wilayah Indonesia.",
-      "startSeconds": 10.514,
-      "endSeconds": 18.793
+      "startSeconds": 10.606,
+      "endSeconds": 18.957
     },
     {
       "id": "subtitle-4",
       "text": "Proses panjang tersebut menghasilkan bentang alam yang beragam, mulai dari pegunungan, gunung berapi, hingga dataran rendah.",
-      "startSeconds": 18.793,
-      "endSeconds": 26.286
+      "startSeconds": 18.957,
+      "endSeconds": 26.515
     },
     {
       "id": "subtitle-5",
       "text": "Inilah perjalanan geologi yang membentuk kepulauan Indonesia seperti yang kita kenal sekarang.",
-      "startSeconds": 26.286,
-      "endSeconds": 31.966
+      "startSeconds": 26.515,
+      "endSeconds": 32.245
     }
   ]
 };
