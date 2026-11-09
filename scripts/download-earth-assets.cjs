@@ -1,30 +1,27 @@
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require("fs");
+const path = require("path");
 
-const url =
+const URL =
   "https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74218/world.topo.bathy.200412.3x5400x2700.jpg"\;
 
-const output = path.resolve(
+const OUTPUT = path.join(
   __dirname,
-  "../public/images/earth/earth-blue-marble.jpg"
+  "..",
+  "public",
+  "images",
+  "earth",
+  "earth-blue-marble.jpg"
 );
 
 async function main() {
-  if (fs.existsSync(output) && fs.statSync(output).size > 100000) {
-    console.log("[EARTH] NASA Blue Marble sudah tersedia.");
-    return;
-  }
+  console.log("[Earth Assets] Downloading NASA Earth texture...");
 
-  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
 
-  console.log("[EARTH] Mengunduh tekstur NASA Blue Marble...");
-
-  const response = await fetch(url, {
-    headers: { "User-Agent": "GeoGlobeTales/1.0" },
-  });
+  const response = await fetch(URL);
 
   if (!response.ok) {
-    throw new Error(`Download NASA gagal: HTTP ${response.status}`);
+    throw new Error(`NASA download failed: HTTP ${response.status}`);
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -32,19 +29,20 @@ async function main() {
   if (
     buffer.length < 100000 ||
     buffer[0] !== 0xff ||
-    buffer[1] !== 0xd8
+    buffer[1] !== 0xd8 ||
+    buffer[2] !== 0xff
   ) {
-    throw new Error("File tekstur bukan JPEG yang valid.");
+    throw new Error("Downloaded file is not a valid JPEG image.");
   }
 
-  fs.writeFileSync(output, buffer);
+  fs.writeFileSync(OUTPUT, buffer);
 
-  console.log(
-    `[EARTH] Tekstur berhasil disimpan: ${(buffer.length / 1048576).toFixed(2)} MB`
-  );
+  console.log("[Earth Assets] Download complete.");
+  console.log(`[Earth Assets] Saved: ${OUTPUT}`);
+  console.log(`[Earth Assets] Size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
 }
 
 main().catch((error) => {
-  console.error("[EARTH ERROR]", error.message);
+  console.error("[Earth Assets] ERROR:", error.message);
   process.exit(1);
 });
