@@ -1,155 +1,250 @@
-import React from 'react';
+import React from "react";
 import {
   AbsoluteFill,
+  Audio,
   interpolate,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
-} from 'remotion';
-import { GEO_SCENES } from './data/scriptData';
+} from "remotion";
+
+import { GEO_SCENES } from "./data/scriptData";
+import { generatedNarration } from "./projects/generated/narration";
 
 export const MainVideo: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const scene =
-    GEO_SCENES.find(
-      (s) => frame >= s.startFrame && frame < s.startFrame + s.durationInFrames
-    ) || GEO_SCENES[GEO_SCENES.length - 1];
+  const foundIndex = GEO_SCENES.findIndex(
+    (scene) =>
+      frame >= scene.startFrame &&
+      frame < scene.endFrame,
+  );
 
-  const prevScene = GEO_SCENES[Math.max(0, scene.id - 2)];
-  const localFrame = frame - scene.startFrame;
+  const sceneIndex =
+    foundIndex >= 0
+      ? foundIndex
+      : frame < GEO_SCENES[0].startFrame
+        ? 0
+        : GEO_SCENES.length - 1;
+
+  const scene = GEO_SCENES[sceneIndex];
+  const previousScene =
+    GEO_SCENES[Math.max(0, sceneIndex - 1)];
+
+  const localFrame = Math.max(
+    0,
+    frame - scene.startFrame,
+  );
 
   const headerSpring = spring({
     frame: localFrame,
     fps,
-    config: { damping: 16, stiffness: 120 },
+    config: {
+      damping: 18,
+      stiffness: 110,
+      mass: 0.8,
+    },
   });
 
-  const camSpring = spring({
+  const cameraSpring = spring({
     frame: localFrame,
     fps,
-    config: { damping: 24, stiffness: 55 },
+    config: {
+      damping: 26,
+      stiffness: 45,
+      mass: 1.1,
+    },
   });
 
-  const scale =
-    scene.id === 1
-      ? interpolate(localFrame, [0, scene.durationInFrames], [1.0, 1.15])
-      : interpolate(camSpring, [0, 1], [prevScene.cam.scale, scene.cam.scale]);
-
-  const tx =
-    scene.id === 1
-      ? 0
-      : interpolate(camSpring, [0, 1], [prevScene.cam.x, scene.cam.x]);
-
-  const ty =
-    scene.id === 1
-      ? 0
-      : interpolate(camSpring, [0, 1], [prevScene.cam.y, scene.cam.y]);
-
-  const words = scene.narration.split(' ');
-  const activeWord = Math.floor(
-    interpolate(
-      localFrame,
-      [0, scene.durationInFrames - 15],
-      [0, words.length - 1],
-      { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-    )
+  const cameraScale = interpolate(
+    cameraSpring,
+    [0, 1],
+    [previousScene.cam.scale, scene.cam.scale],
   );
 
-  const pulse = Math.sin(frame / 5) * 0.5 + 0.5;
+  const cameraX = interpolate(
+    cameraSpring,
+    [0, 1],
+    [previousScene.cam.x, scene.cam.x],
+  );
+
+  const cameraY = interpolate(
+    cameraSpring,
+    [0, 1],
+    [previousScene.cam.y, scene.cam.y],
+  );
+
+  const words = scene.narration
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const wordProgress = interpolate(
+    localFrame,
+    [
+      0,
+      Math.max(1, scene.durationInFrames - 1),
+    ],
+    [0, Math.max(0, words.length)],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    },
+  );
+
+  const activeWord = Math.min(
+    words.length - 1,
+    Math.floor(wordProgress),
+  );
+
+  const pulse = Math.sin(frame / 7) * 0.5 + 0.5;
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#06101E',
-        fontFamily: 'sans-serif',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        overflow: 'hidden',
+        backgroundColor: "#06101E",
+        color: "#FFFFFF",
+        fontFamily: "Arial, sans-serif",
+        overflow: "hidden",
       }}
     >
-      {/* ZONA 1: HEADER ATAS (Tinggi Tetap 410px - Bebas Tabrakan) */}
+      {/* AUDIO MASTER: diputar satu file penuh dari frame pertama */}
+      <Audio
+        src={staticFile(
+          generatedNarration.audioPath.replace(/^\/+/, ""),
+        )}
+        volume={1}
+      />
+
+      {/* HEADER */}
       <div
         style={{
-          height: 410,
-          padding: '85px 60px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          gap: 14,
+          position: "absolute",
+          top: 75,
+          left: 55,
+          right: 55,
+          height: 340,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          gap: 18,
           opacity: headerSpring,
-          transform: `translateY(${interpolate(headerSpring, [0, 1], [-30, 0])}px)`,
+          transform: `translateY(${interpolate(
+            headerSpring,
+            [0, 1],
+            [-35, 0],
+          )}px)`,
         }}
       >
         <div
           style={{
-            backgroundColor: 'rgba(245, 158, 11, 0.16)',
-            border: '2px solid #F59E0B',
-            color: '#FBBF24',
-            padding: '8px 26px',
+            color: "#FBBF24",
+            border: "2px solid #F59E0B",
+            backgroundColor: "rgba(245,158,11,0.12)",
+            padding: "10px 25px",
             borderRadius: 999,
-            fontSize: 23,
+            fontSize: 22,
             fontWeight: 800,
-            letterSpacing: 2.5,
+            letterSpacing: 3,
           }}
         >
           {scene.badge}
         </div>
-        <h1
+
+        <div
           style={{
-            margin: 0,
-            color: '#FFFFFF',
-            fontSize: 50,
+            fontSize: 51,
+            lineHeight: 1.15,
             fontWeight: 900,
-            lineHeight: 1.16,
+            textAlign: "center",
+            maxWidth: 950,
           }}
         >
           {scene.headline}
-        </h1>
-        <div style={{ color: '#38BDF8', fontSize: 28, fontWeight: 600 }}>
+        </div>
+
+        <div
+          style={{
+            fontSize: 27,
+            color: "#38BDF8",
+            fontWeight: 600,
+          }}
+        >
           {scene.subheadline}
         </div>
       </div>
 
-      {/* ZONA 2: PANGGUNG PETA TENGAH (Tinggi Tetap 950px) */}
+      {/* PANGGUNG PETA */}
       <div
         style={{
-          height: 950,
-          margin: '0 60px',
+          position: "absolute",
+          top: 455,
+          left: 48,
+          right: 48,
+          height: 900,
           borderRadius: 32,
-          border: '2px solid rgba(148, 163, 184, 0.18)',
-          backgroundColor: '#08172B',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          border: "2px solid rgba(148,163,184,0.2)",
+          background:
+            "radial-gradient(circle at 50% 45%, #102B49 0%, #08172B 70%)",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <svg
           viewBox="0 0 1000 540"
           style={{
-            width: '100%',
-            height: 'auto',
-            transform: `scale(${scale}) translate(${tx}px, ${ty}px)`,
-            transformOrigin: 'center center',
+            width: "100%",
+            height: "auto",
+            transform: `translate(${cameraX}px, ${cameraY}px) scale(${cameraScale})`,
+            transformOrigin: "center center",
           }}
         >
-          <g fill="#2C3E55" stroke="#475569" strokeWidth="1.2">
-            <path d="M 85,85 L 235,75 L 260,185 L 175,240 L 115,190 Z" />
-            <path d="M 210,265 L 295,305 L 265,455 L 215,425 Z" />
-            <path d="M 430,80 L 555,70 L 570,165 L 445,175 Z" />
-            <path d="M 435,190 L 560,190 L 580,380 L 500,430 L 430,305 Z" />
-            <path d="M 565,70 L 865,80 L 840,245 L 690,255 L 575,180 Z" />
-            <path d="M 745,380 L 875,370 L 890,470 L 760,480 Z" />
+          <defs>
+            <radialGradient
+              id="oceanGlow"
+              cx="50%"
+              cy="50%"
+              r="70%"
+            >
+              <stop offset="0%" stopColor="#163B5E" />
+              <stop offset="100%" stopColor="#08172B" />
+            </radialGradient>
+          </defs>
+
+          <rect
+            x="0"
+            y="0"
+            width="1000"
+            height="540"
+            fill="url(#oceanGlow)"
+          />
+
+          {/* Bentuk daratan ilustratif */}
+          <g
+            fill="#334B62"
+            stroke="#7890A5"
+            strokeWidth="1.5"
+          >
+            <path d="M85 85 L235 75 L260 185 L175 240 L115 190 Z" />
+            <path d="M210 265 L295 305 L265 455 L215 425 Z" />
+            <path d="M430 80 L555 70 L570 165 L445 175 Z" />
+            <path d="M435 190 L560 190 L580 380 L500 430 L430 305 Z" />
+            <path d="M565 70 L865 80 L840 245 L690 255 L575 180 Z" />
+            <path d="M745 380 L875 370 L890 470 L760 480 Z" />
           </g>
 
           {/* Kepulauan Indonesia */}
-          <g fill="#F59E0B" stroke="#FDE68A" strokeWidth="1.6">
+          <g
+            fill="#F59E0B"
+            stroke="#FDE68A"
+            strokeWidth="2"
+          >
             <polygon points="682,290 704,306 720,334 708,342 674,302" />
             <polygon points="722,344 766,348 764,356 720,352" />
             <polygon points="728,286 764,284 768,322 732,326" />
@@ -163,20 +258,23 @@ export const MainVideo: React.FC = () => {
             y="268"
             textAnchor="middle"
             fill="#FBBF24"
-            fontSize="13"
-            fontWeight="800"
+            fontSize="17"
+            fontWeight="900"
+            letterSpacing="2"
           >
             INDONESIA
           </text>
 
           {scene.showPlates && (
-            <path
-              d="M 655,285 Q 715,375 880,360"
+            <g
               fill="none"
               stroke="#38BDF8"
-              strokeWidth="3.2"
-              strokeDasharray="7 5"
-            />
+              strokeWidth="4"
+              strokeDasharray="10 8"
+            >
+              <path d="M640 275 Q710 365 890 360" />
+              <path d="M690 240 Q745 285 820 280" />
+            </g>
           )}
 
           {scene.showVolcanoes &&
@@ -187,51 +285,133 @@ export const MainVideo: React.FC = () => {
               [754, 350],
               [782, 352],
               [788, 304],
-            ].map(([cx, cy], idx) => (
-              <circle
-                key={idx}
-                cx={cx}
-                cy={cy}
-                r={4 + pulse * 4}
-                fill="#EF4444"
-              />
+            ].map(([cx, cy], index) => (
+              <g key={index}>
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={7 + pulse * 5}
+                  fill="#EF4444"
+                  opacity={0.25 + pulse * 0.45}
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r="4"
+                  fill="#FCA5A5"
+                />
+              </g>
             ))}
         </svg>
-      </div>
 
-      {/* ZONA 3: SUBTITLE BAWAH (Tinggi Tetap 520px) */}
-      <div style={{ height: 520, padding: '25px 60px 110px', display: 'flex', alignItems: 'flex-end' }}>
         <div
           style={{
-            width: '100%',
-            backgroundColor: 'rgba(10, 22, 42, 0.95)',
-            border: '2px solid rgba(148, 163, 184, 0.25)',
-            borderRadius: 28,
-            padding: '34px 40px',
-            textAlign: 'center',
+            position: "absolute",
+            left: 25,
+            bottom: 25,
+            color: "#93C5FD",
+            fontSize: 17,
+            letterSpacing: 2,
+            fontWeight: 700,
           }}
         >
-          <p style={{ margin: 0, fontSize: 37, lineHeight: 1.42, fontWeight: 700 }}>
-            {words.map((w, i) => (
+          ILUSTRASI GEOGRAFI • NUSANTARA
+        </div>
+      </div>
+
+      {/* SUBTITLE BERDASARKAN TIMESTAMP NARASI */}
+      <div
+        style={{
+          position: "absolute",
+          left: 55,
+          right: 55,
+          bottom: 105,
+          minHeight: 350,
+          display: "flex",
+          alignItems: "flex-end",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            backgroundColor: "rgba(5,16,31,0.96)",
+            border: "2px solid rgba(148,163,184,0.3)",
+            borderRadius: 28,
+            padding: "34px 35px",
+            textAlign: "center",
+            boxShadow: "0 15px 50px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div
+            style={{
+              color: "#FBBF24",
+              fontSize: 18,
+              fontWeight: 800,
+              letterSpacing: 3,
+              marginBottom: 18,
+            }}
+          >
+            NARASI
+          </div>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: 35,
+              lineHeight: 1.45,
+              fontWeight: 750,
+            }}
+          >
+            {words.map((word, index) => (
               <span
-                key={i}
+                key={`${scene.id}-${index}`}
                 style={{
                   color:
-                    i === activeWord
-                      ? '#FBBF24'
-                      : i < activeWord
-                      ? '#FFFFFF'
-                      : '#94A3B8',
-                  marginRight: 10,
-                  display: 'inline-block',
+                    index === activeWord
+                      ? "#FBBF24"
+                      : index < activeWord
+                        ? "#FFFFFF"
+                        : "#94A3B8",
+                  display: "inline-block",
+                  marginRight: 9,
                 }}
               >
-                {w}
+                {word}
               </span>
             ))}
           </p>
         </div>
       </div>
+
+      {/* INDIKATOR PROGRES */}
+      <div
+        style={{
+          position: "absolute",
+          left: 55,
+          right: 55,
+          bottom: 55,
+          height: 5,
+          backgroundColor: "rgba(148,163,184,0.25)",
+          borderRadius: 99,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${Math.min(
+              100,
+              (frame / TOTAL_FRAMES_SAFE) * 100,
+            )}%`,
+            height: "100%",
+            backgroundColor: "#F59E0B",
+          }}
+        />
+      </div>
     </AbsoluteFill>
   );
 };
+
+const TOTAL_FRAMES_SAFE = Math.ceil(
+  generatedNarration.durationSeconds * 30,
+);

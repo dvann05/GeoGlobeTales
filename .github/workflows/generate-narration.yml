@@ -41,7 +41,7 @@ jobs:
       - name: Install audio system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2-dev
+          sudo apt-get install -y libasound2-dev ffmpeg
 
       - name: Generate Indonesian narration
         env:
@@ -86,6 +86,25 @@ jobs:
           mkdir -p out
           npm run render
 
+      - name: Verify final MP4 duration
+        shell: bash
+        run: |
+          EXPECTED=$(node -e "const m=require('./public/audio/narration/narration.json'); process.stdout.write(String(m.durationSeconds))")
+          ACTUAL=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 out/video.mp4)
+
+          echo "Durasi narasi : ${EXPECTED}s"
+          echo "Durasi video  : ${ACTUAL}s"
+
+          awk -v expected="$EXPECTED" -v actual="$ACTUAL" 'BEGIN {
+            diff = actual - expected;
+            if (diff < 0) diff = -diff;
+            if (diff > 0.15) {
+              print "ERROR: Durasi video tidak sesuai dengan durasi narasi.";
+              exit 1;
+            }
+            print "OK: Durasi video sesuai dengan narasi.";
+          }'
+
       - name: Save generated narration
         run: |
           git config user.name "github-actions[bot]"
@@ -100,7 +119,7 @@ jobs:
       - name: Upload finished video
         uses: actions/upload-artifact@v4
         with:
-          name: GeoGlobeTales-20s-MP4
+          name: GeoGlobeTales-Narrated-MP4
           path: out/video.mp4
           if-no-files-found: error
           retention-days: 7
