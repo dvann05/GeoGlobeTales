@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const URL =
-  "https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74218/world.topo.bathy.200412.3x5400x2700.jpg"\;
+  "https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74218/world.topo.bathy.200412.3x5400x2700.jpg";
 
 const OUTPUT = path.join(
   __dirname,
