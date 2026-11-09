@@ -2,41 +2,59 @@
   "provider": "tts-indonesia-gratis",
   "language": "id-ID",
   "voiceId": "ardi",
-  "text": "Indonesia merupakan negara kepulauan yang terbentuk melalui proses geologi selama jutaan tahun. Pergerakan lempeng tektonik menyebabkan berbagai perubahan pada permukaan bumi. Aktivitas vulkanik, pergeseran kerak bumi, dan perubahan permukaan laut turut membentuk ribuan pulau yang kini menjadi wilayah Indonesia. Proses panjang tersebut menghasilkan bentang alam yang beragam, mulai dari pegunungan, gunung berapi, hingga dataran rendah. Inilah perjalanan geologi yang membentuk kepulauan Indonesia seperti yang kita kenal sekarang.",
+  "text": "Indonesia tidak terbentuk sebagai satu wilayah kolonial dalam waktu singkat. Penguasaan Belanda berlangsung secara bertahap, melalui wilayah dan periode yang berbeda.\n\nDi berbagai kawasan Nusantara, kekuasaan kolonial juga berhadapan dengan kerajaan lokal, kesultanan, serta kekuatan asing lainnya.\n\nWilayah seperti Jawa, Sumatra, Maluku, Kalimantan, Sulawesi, hingga Papua memiliki perjalanan sejarah yang berbeda. Tidak semuanya berada di bawah kendali Belanda pada waktu yang sama.\n\nMelalui peperangan, perjanjian, ekspedisi, dan perubahan politik, pengaruh kolonial semakin meluas.\n\nProses panjang inilah yang kemudian menjadi salah satu bagian penting dalam terbentuknya wilayah Indonesia modern.\n\nKarena itu, sejarah Indonesia bukan sekadar cerita tentang satu peta dan satu masa penjajahan, melainkan perjalanan panjang perubahan kekuasaan di seluruh Nusantara.",
   "audioPath": "audio/narration/narration.wav",
   "format": "wav",
-  "durationSeconds": 32.245,
+  "durationSeconds": 48.626,
   "alignment": "estimated",
   "subtitles": [
     {
       "id": "subtitle-1",
-      "text": "Indonesia merupakan negara kepulauan yang terbentuk melalui proses geologi selama jutaan tahun.",
+      "text": "Indonesia tidak terbentuk sebagai satu wilayah kolonial dalam waktu singkat.",
       "startSeconds": 0.0,
-      "endSeconds": 5.791
+      "endSeconds": 4.317
     },
     {
       "id": "subtitle-2",
-      "text": "Pergerakan lempeng tektonik menyebabkan berbagai perubahan pada permukaan bumi.",
-      "startSeconds": 5.791,
-      "endSeconds": 10.606
+      "text": "Penguasaan Belanda berlangsung secara bertahap, melalui wilayah dan periode yang berbeda.",
+      "startSeconds": 4.317,
+      "endSeconds": 9.373
     },
     {
       "id": "subtitle-3",
-      "text": "Aktivitas vulkanik, pergeseran kerak bumi, dan perubahan permukaan laut turut membentuk ribuan pulau yang kini menjadi wilayah Indonesia.",
-      "startSeconds": 10.606,
-      "endSeconds": 18.957
+      "text": "Di berbagai kawasan Nusantara, kekuasaan kolonial juga berhadapan dengan kerajaan lokal, kesultanan, serta kekuatan asing lainnya.",
+      "startSeconds": 9.373,
+      "endSeconds": 16.758
     },
     {
       "id": "subtitle-4",
-      "text": "Proses panjang tersebut menghasilkan bentang alam yang beragam, mulai dari pegunungan, gunung berapi, hingga dataran rendah.",
-      "startSeconds": 18.957,
-      "endSeconds": 26.515
+      "text": "Wilayah seperti Jawa, Sumatra, Maluku, Kalimantan, Sulawesi, hingga Papua memiliki perjalanan sejarah yang berbeda.",
+      "startSeconds": 16.758,
+      "endSeconds": 23.291
     },
     {
       "id": "subtitle-5",
-      "text": "Inilah perjalanan geologi yang membentuk kepulauan Indonesia seperti yang kita kenal sekarang.",
-      "startSeconds": 26.515,
-      "endSeconds": 32.245
+      "text": "Tidak semuanya berada di bawah kendali Belanda pada waktu yang sama.",
+      "startSeconds": 23.291,
+      "endSeconds": 27.153
+    },
+    {
+      "id": "subtitle-6",
+      "text": "Melalui peperangan, perjanjian, ekspedisi, dan perubahan politik, pengaruh kolonial semakin meluas.",
+      "startSeconds": 27.153,
+      "endSeconds": 32.777
+    },
+    {
+      "id": "subtitle-7",
+      "text": "Proses panjang inilah yang kemudian menjadi salah satu bagian penting dalam terbentuknya wilayah Indonesia modern.",
+      "startSeconds": 32.777,
+      "endSeconds": 39.253
+    },
+    {
+      "id": "subtitle-8",
+      "text": "Karena itu, sejarah Indonesia bukan sekadar cerita tentang satu peta dan satu masa penjajahan, melainkan perjalanan panjang perubahan kekuasaan di seluruh Nusantara.",
+      "startSeconds": 39.253,
+      "endSeconds": 48.626
     }
   ]
 }
