@@ -4,6 +4,15 @@ import re
 import wave
 from pathlib import Path
 
+# Playback tidak diperlukan karena workflow hanya menghasilkan file WAV.
+# Modul g2p-id mengimpor simpleaudio meskipun fungsi synthesize tidak memakainya.
+import sys
+import types
+
+simpleaudio_stub = types.ModuleType("simpleaudio")
+simpleaudio_stub.WaveObject = object
+sys.modules.setdefault("simpleaudio", simpleaudio_stub)
+
 from g2p_id.scripts.tts import tts as synthesize
 
 

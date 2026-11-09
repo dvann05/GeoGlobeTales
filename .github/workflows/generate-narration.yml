@@ -50,7 +50,11 @@ jobs:
           TTS_FILENAME: ${{ inputs.filename }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "git+https://github.com/drat/TTS-Indonesia-Gratis.git"
+          # Install g2p-id tanpa dependency playback simpleaudio
+          python -m pip install --no-deps "git+https://github.com/drat/TTS-Indonesia-Gratis.git"
+
+          # Install seluruh dependency utama TTS tanpa simpleaudio
+          python -m pip install "gradio>=5" torch tts "sacremoses>=0.0.41" "nltk>=3.7" "onnxruntime>=1.7.0" wget platformdirs
           python scripts/generate_tts.py \
             --text "$TTS_TEXT" \
             --speaker "$TTS_SPEAKER" \
