@@ -1,18 +1,12 @@
 import type {
   Feature,
   FeatureCollection,
+  GeoJsonProperties,
   Geometry,
 } from "geojson";
 
-export type RegionFeature = Feature<
-  Geometry,
-  Record<string, unknown>
->;
-
-export type RegionDataset = FeatureCollection<
-  Geometry,
-  Record<string, unknown>
->;
+export type RegionFeature = Feature<Geometry, GeoJsonProperties>;
+export type RegionDataset = FeatureCollection<Geometry, GeoJsonProperties>;
 
 export type RegionMatch = {
   query: string;
@@ -23,20 +17,9 @@ export type RegionMatch = {
 };
 
 const PROPERTY_KEYS = [
-  "name",
-  "NAME",
-  "Name",
-  "name_en",
-  "NAME_EN",
-  "NAME_1",
-  "NAME_2",
-  "ADMIN",
-  "admin",
-  "PROVINSI",
-  "province",
-  "region",
-  "REGION",
-  "label",
+  "name", "NAME", "Name", "name_en", "NAME_EN",
+  "NAME_1", "NAME_2", "ADMIN", "admin",
+  "PROVINSI", "province", "region", "REGION", "label",
 ];
 
 export function normalizeRegionName(value: string): string {
@@ -74,12 +57,9 @@ export function resolveRegions(
     ].map(normalizeRegionName);
 
     const features = dataset.features.filter((item) => {
-      const names = getFeatureNames(item as RegionFeature);
-
-      return names.some((name) =>
-        alternativeNames.includes(name)
-      );
-    }) as RegionFeature[];
+      const names = getFeatureNames(item);
+      return names.some((name) => alternativeNames.includes(name));
+    });
 
     return {
       query,

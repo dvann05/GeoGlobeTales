@@ -7,7 +7,6 @@ import {
   BufferGeometry,
   CatmullRomCurve3,
   Float32BufferAttribute,
-  LineBasicMaterial,
   MeshBasicMaterial,
   SphereGeometry,
   TextureLoader,
@@ -70,7 +69,7 @@ function createCountryBorders() {
     }
   };
 
-  for (const feature of worldDataset.features) {
+  for (const feature of worldDataset.features.features) {
     const geometry = feature.geometry;
     if (!geometry) continue;
 
